@@ -1,49 +1,284 @@
 
 <!DOCTYPE html>
 <html lang="ms">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sistem Tempahan Bilik Khas</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: #fdfbf7;
-        color: #2c1810;
-      }
-      h1, h2, h3, .luxury-font {
-        font-family: 'Playfair Display', serif;
-      }
-      .garamond {
-        font-family: 'Cormorant Garamond', serif;
-      }
-      .gold-gradient {
-        background: linear-gradient(135deg, #c5a059 0%, #ecd08d 50%, #c5a059 100%);
-      }
-      .gold-border {
-        border: 1px solid #c5a059;
-      }
-      .luxury-shadow {
-        box-shadow: 0 10px 30px -5px rgba(44, 24, 16, 0.1), 0 4px 10px -5px rgba(44, 24, 16, 0.05);
-      }
-    </style>
-  <script type="importmap">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistem Tempahan Bilik Khas SMK Landas</title>
+  
+  <!-- CSS & Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  
+  <!-- Scripts for Single-File React -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #fdfbf7; color: #2c1810; scroll-behavior: smooth; }
+    h1, h2, h3, .luxury-font { font-family: 'Playfair Display', serif; }
+    .garamond { font-family: 'Cormorant Garamond', serif; }
+    .gold-gradient { background: linear-gradient(135deg, #c5a059 0%, #ecd08d 50%, #c5a059 100%); }
+    .gold-border { border: 1px solid #c5a059; }
+    .luxury-shadow { box-shadow: 0 10px 30px -5px rgba(44, 24, 16, 0.1), 0 4px 10px -5px rgba(44, 24, 16, 0.05); }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #c5a059; border-radius: 10px; }
+  </style>
+<script type="importmap">
 {
   "imports": {
-    "framer-motion": "https://esm.sh/framer-motion@^12.34.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "react": "https://esm.sh/react@^19.2.4",
     "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
     "react/": "https://esm.sh/react@^19.2.4/",
-    "react": "https://esm.sh/react@^19.2.4"
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "framer-motion": "https://esm.sh/framer-motion@^12.34.0",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.4"
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
-  <body>
-    <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useCallback, useMemo } = React;
+    const { motion, AnimatePresence } = window.Motion;
+
+    // --- CONSTANTS ---
+    const ROOMS = ["Bilik Seminar 1", "Bilik Seminar 2", "Bilik Seminar 3", "Bilik Audio Visual"];
+    const TIME_SLOTS_START = ["7:40 pg", "8:10 pg", "8:40 pg", "9:10 pg", "9:40 pg", "10:10 pg", "10:40 pg", "11:10 pg", "11:40 pg", "12:10 tgh", "12:40 tgh", "1:10 ptg", "1:40 ptg", "2:10 ptg", "2:40 ptg"];
+    const TIME_SLOTS_END = ["8:10 pg", "8:40 pg", "9:10 pg", "9:40 pg", "10:10 pg", "10:40 pg", "11:10 pg", "11:40 pg", "12:10 tgh", "12:40 tgh", "1:10 ptg", "1:40 ptg", "2:10 ptg", "2:40 ptg"];
+    const ALL_GRID_SLOTS = ["7:40 pg", "8:10 pg", "8:40 pg", "9:10 pg", "9:40 pg", "10:10 pg", "10:40 pg", "11:10 pg", "11:40 pg", "12:10 tgh", "12:40 tgh", "1:10 ptg", "1:40 ptg", "2:10 ptg"];
+    
+    const INITIAL_TEACHERS = [
+      "Cg. Azman bin Mohd Nor @ Harun", "Cg. Wan Johari bin Wan Gati", "Cg. Abdullah bin Ab Rahman",
+      "Cg. Shaylatulazwin binti Abdul Wahid", "Cg. Anuar Ruddin bin Salleh", "Cg. Zalina binti Omar",
+      "Cg. Mohd Kamal bin Harun", "Cg. Mohd Shamsuddin bin Othman", "Cg. Alimien bin Muda",
+      "Ust. Ismail bin Salleh", "Cg. Mohammad Syafiq bin Abdul Majeed", "Cg. Mohd Fadli bin Rani",
+      "Cg. Mohd Hamidi bin Mohd Noor", "Cg. Dul – Rosidi bin Ahmad", "Cg. Mohd Khalis bin Abd. Malik",
+      "Cg. Amirul Shahadam bin Suhasmadi", "Cg. Mohd Rizuan bin Ibrahim", "Cg. Nasharuddin bin Ngah",
+      "Cg. Mohd Faizal bin Mohd Noor", "Cg. Mohd Shufian bin Abdul Kadir", "Cg. Nor Azimah binti Rokman",
+      "Cg. Farida Hamimi binti Muhamad Saidi", "Ustz. Hasni binti Baba", "Cg. Juliani binti Mansor",
+      "Cg. Kartini binti Abdul Rahim", "Cg. Noordiana binti Abdul Aziz", "Cg. Nor Hamiza binti Ramli",
+      "Cg. Noorazlina binti Ismail", "Cg. Norul Hazlinda bt. Romli", "Cg. Hibatul ’ Atikah binti Khairul Anuar",
+      "Cg. Nur Faizzatul Ain binti Othman", "Cg. Rosharizam binti Abd. Ghani", "Ustz. Rosmawati binti Mamat",
+      "Cg. Rusmaniza binti Jusoh", "Cg. Sazilawati binti Yusof", "Cg. Saidatul Asima binti Kamarulzaman Shah",
+      "Cg. Siti Halimah binti Ab. Halim", "Cg. Siti Saniah binti Idris", "Cg. Suriani binti Muda",
+      "Ustz Rohana binti Awang", "Cg. Wan Nor Azlinda bt. Wan Abd. Aziz", "Cg. Amirah Nasuha binti Suhaimi",
+      "Cg. Suhaila Afiqah binti Mohd Nasir", "Cg. Nurul Najibah binti Musameh", "Cg. Iza Amirah binti Muhamad Zawahir",
+      "Cg. Nurzahidatullazura binti Amzah", "Cg. Azizah binti Ismail"
+    ];
+
+    // --- HELPERS ---
+    const timeToMinutes = (timeStr) => {
+      const [time, period] = timeStr.split(' ');
+      let [hours, minutes] = time.split(':').map(Number);
+      if (period === 'ptg' && hours !== 12) hours += 12;
+      else if (period === 'pg' && hours === 12) hours = 0;
+      return hours * 60 + minutes;
+    };
+
+    const isOverlapping = (sA, eA, sB, eB) => {
+      const startA = timeToMinutes(sA), endA = timeToMinutes(eA);
+      const startB = timeToMinutes(sB), endB = timeToMinutes(eB);
+      return Math.max(startA, startB) < Math.min(endA, endB);
+    };
+
+    // --- COMPONENTS ---
+    const Icon = ({ name, size = 18, className = "" }) => {
+      useEffect(() => { lucide.createIcons(); }, [name]);
+      return <i data-lucide={name} className={className} style={{ width: size, height: size }}></i>;
+    };
+
+    const TeacherManager = ({ teachers, onAdd, onDelete }) => {
+      const [newTeacher, setNewTeacher] = useState('');
+      const handleAdd = () => { if (newTeacher.trim()) { onAdd(newTeacher.trim()); setNewTeacher(''); } };
+      return (
+        <div className="bg-white p-6 rounded-2xl luxury-shadow gold-border">
+          <div className="flex items-center gap-3 mb-6 border-b border-stone-100 pb-4">
+            <Icon name="users" className="text-[#c5a059]" />
+            <h2 className="text-2xl font-semibold text-[#2c1810]">4. Pengurusan Guru</h2>
+          </div>
+          <div className="flex gap-2 mb-6">
+            <input type="text" value={newTeacher} onChange={(e) => setNewTeacher(e.target.value)} placeholder="Nama Guru Baru..." className="flex-1 px-4 py-3 rounded-xl border border-stone-200 outline-none focus:ring-2 focus:ring-[#c5a059]/30" />
+            <button onClick={handleAdd} className="gold-gradient text-white px-6 py-2 rounded-xl flex items-center gap-2 font-bold shadow-md active:scale-95 transition-all"><Icon name="user-plus" /><span>Tambah</span></button>
+          </div>
+          <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+            <AnimatePresence>
+              {teachers.map((t) => (
+                <motion.div key={t} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center justify-between p-3 bg-stone-50 rounded-xl border border-transparent hover:border-[#ecd08d] transition-all group">
+                  <span className="garamond text-lg font-medium text-stone-700">{t}</span>
+                  <button onClick={() => onDelete(t)} className="text-stone-300 hover:text-rose-500 transition-colors"><Icon name="trash-2" size={16} /></button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        </div>
+      );
+    };
+
+    const AvailabilityGrid = ({ bookings }) => {
+      const [viewDate, setViewDate] = useState(new Date().toISOString().split('T')[0]);
+      const shiftDate = (days) => {
+        const d = new Date(viewDate);
+        d.setDate(d.getDate() + days);
+        setViewDate(d.toISOString().split('T')[0]);
+      };
+      const filtered = bookings.filter(b => b.date === viewDate);
+      const getStatus = (room, slot) => filtered.find(b => b.room === room && timeToMinutes(slot) >= timeToMinutes(b.startTime) && timeToMinutes(slot) < timeToMinutes(b.endTime));
+
+      return (
+        <div className="bg-white p-6 rounded-2xl luxury-shadow border-t-4 border-[#c5a059]">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
+            <div className="flex items-center gap-3"><Icon name="calendar" className="text-[#c5a059]" /><div><h2 className="text-2xl font-bold text-[#2c1810]">2. Jadual Ketersediaan</h2><p className="text-sm text-stone-500 italic garamond">Semak kekosongan bilik harian</p></div></div>
+            <div className="flex items-center bg-stone-50 border border-stone-200 rounded-xl p-1 shadow-sm">
+              <button onClick={() => shiftDate(-1)} className="p-2 hover:bg-white hover:text-[#c5a059] rounded-lg transition-all"><Icon name="chevron-left" /></button>
+              <input type="date" value={viewDate} onChange={(e) => setViewDate(e.target.value)} className="bg-transparent border-none outline-none font-bold text-stone-700 px-2 cursor-pointer" />
+              <button onClick={() => shiftDate(1)} className="p-2 hover:bg-white hover:text-[#c5a059] rounded-lg transition-all"><Icon name="chevron-right" /></button>
+            </div>
+          </div>
+          <div className="overflow-x-auto rounded-xl border border-stone-100 bg-stone-50/20">
+            <table className="w-full border-collapse min-w-[700px]">
+              <thead>
+                <tr className="bg-stone-50">
+                  <th className="p-4 border-b border-stone-200 text-left w-28 bg-white sticky left-0 z-10 font-bold uppercase text-[10px] tracking-widest text-[#c5a059]">Masa</th>
+                  {ROOMS.map(r => <th key={r} className="p-4 border-b border-stone-200 text-center"><span className="luxury-font text-xs font-bold uppercase tracking-wide">{r}</span></th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {ALL_GRID_SLOTS.map(slot => (
+                  <tr key={slot} className="group">
+                    <td className="p-3 border-b border-stone-100 text-[11px] font-bold text-stone-400 bg-white sticky left-0 z-10 group-hover:text-[#c5a059] transition-colors">{slot}</td>
+                    {ROOMS.map(room => {
+                      const b = getStatus(room, slot);
+                      return (
+                        <td key={room+slot} className="p-2 border-b border-stone-100">
+                          {b ? <div className="bg-rose-50 text-rose-700 border border-rose-100 p-2 rounded-lg text-[10px] luxury-shadow"><div className="font-bold truncate">{b.teacher}</div><div>{b.startTime}-{b.endTime}</div></div> : <div className="h-10 border border-dashed border-emerald-100 rounded-lg flex items-center justify-center group-hover:bg-emerald-50 transition-all"><span className="text-[9px] text-emerald-300 font-bold tracking-widest opacity-0 group-hover:opacity-100">KOSONG</span></div>}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    };
+
+    // --- MAIN APP ---
+    const App = () => {
+      const [bookings, setBookings] = useState([]);
+      const [teachers, setTeachers] = useState(INITIAL_TEACHERS);
+      const [selectedRoom, setSelectedRoom] = useState(ROOMS[0]);
+      const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+      const [startTime, setStartTime] = useState(TIME_SLOTS_START[0]);
+      const [endTime, setEndTime] = useState(TIME_SLOTS_END[1]);
+      const [selectedTeacher, setSelectedTeacher] = useState(INITIAL_TEACHERS[0]);
+      const [message, setMessage] = useState(null);
+      const [dateToClear, setDateToClear] = useState(new Date().toISOString().split('T')[0]);
+
+      useEffect(() => {
+        const b = localStorage.getItem('royal_bookings');
+        const t = localStorage.getItem('royal_teachers');
+        if (b) setBookings(JSON.parse(b));
+        if (t) {
+          const tl = JSON.parse(t);
+          setTeachers(tl);
+          setSelectedTeacher(tl[0]);
+        }
+      }, []);
+
+      useEffect(() => { localStorage.setItem('royal_bookings', JSON.stringify(bookings)); }, [bookings]);
+      useEffect(() => { localStorage.setItem('royal_teachers', JSON.stringify(teachers)); }, [teachers]);
+
+      const handleBooking = (e) => {
+        e.preventDefault();
+        if (timeToMinutes(endTime) <= timeToMinutes(startTime)) { setMessage({ text: 'Masa tamat mestilah selepas masa mula.', type: 'error' }); return; }
+        const hasConflict = bookings.some(b => b.date === selectedDate && b.room === selectedRoom && isOverlapping(startTime, endTime, b.startTime, b.endTime));
+        if (hasConflict) setMessage({ text: 'Tempahan tidak berjaya kerana telah ditempah.', type: 'error' });
+        else {
+          setBookings([...bookings, { id: Date.now(), room: selectedRoom, date: selectedDate, startTime, endTime, teacher: selectedTeacher }]);
+          setMessage({ text: 'Tempahan Lulus!', type: 'success' });
+        }
+        setTimeout(() => setMessage(null), 4000);
+      };
+
+      const handleClearByDate = () => {
+        const count = bookings.filter(b => b.date === dateToClear).length;
+        if (count === 0) { setMessage({ text: `Tiada tempahan pada ${dateToClear}.`, type: 'error' }); return; }
+        if (confirm(`Hapus ${count} tempahan pada ${dateToClear}?`)) { setBookings(bookings.filter(b => b.date !== dateToClear)); setMessage({ text: 'Tempahan dipadam.', type: 'success' }); }
+        setTimeout(() => setMessage(null), 3000);
+      };
+
+      return (
+        <div className="min-h-screen bg-[#fdfbf7] pb-20">
+          <header className="relative bg-[#2c1810] text-white py-16 px-6 luxury-shadow overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none"><div className="grid grid-cols-10 h-full">{[...Array(10)].map((_, i) => <div key={i} className="border-r border-[#c5a059]/30 h-full"></div>)}</div></div>
+            <div className="max-w-6xl mx-auto relative z-10 text-center flex flex-col items-center">
+              <img src="https://i.imgur.com/r6TqmA5.png" alt="SMK Landas" className="w-24 md:w-32 mb-6 drop-shadow-[0_0_15px_rgba(197,160,89,0.4)]" />
+              <h2 className="luxury-font text-xl text-[#ecd08d] tracking-[0.2em] uppercase mb-1">SMK LANDAS</h2>
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3">Sistem Tempahan Bilik Khas</h1>
+              <p className="garamond text-xl text-[#ecd08d] italic font-medium">Keunggulan Pengurusan Bilik Sekolah Abad Ke-21</p>
+            </div>
+          </header>
+
+          <main className="max-w-5xl mx-auto px-4 md:px-8 -mt-8 space-y-12">
+            {/* 1. FORM */}
+            <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-8 rounded-2xl luxury-shadow gold-border">
+              <div className="flex items-center gap-3 mb-8 border-b border-stone-100 pb-4"><div className="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white"><Icon name="home" /></div><h2 className="text-2xl font-semibold text-[#2c1810]">1. Borang Tempahan</h2></div>
+              <form onSubmit={handleBooking} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div><label className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 block">Pilih Bilik</label><select value={selectedRoom} onChange={e => setSelectedRoom(e.target.value)} className="w-full bg-stone-50 border border-stone-200 p-4 rounded-xl garamond text-xl focus:ring-2 focus:ring-[#c5a059] outline-none">{ROOMS.map(r => <option key={r}>{r}</option>)}</select></div>
+                  <div><label className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 block">Tarikh Tempahan</label><input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} className="w-full bg-stone-50 border border-stone-200 p-4 rounded-xl text-lg outline-none focus:ring-2 focus:ring-[#c5a059]" /></div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div><label className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 block">Masa Mula</label><select value={startTime} onChange={e => setStartTime(e.target.value)} className="w-full bg-stone-50 border border-stone-200 p-4 rounded-xl outline-none text-sm">{TIME_SLOTS_START.map(t => <option key={t}>{t}</option>)}</select></div>
+                    <div><label className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 block">Masa Tamat</label><select value={endTime} onChange={e => setEndTime(e.target.value)} className="w-full bg-stone-50 border border-stone-200 p-4 rounded-xl outline-none text-sm">{TIME_SLOTS_END.map(t => <option key={t}>{t}</option>)}</select></div>
+                  </div>
+                </div>
+                <div className="flex flex-col justify-between space-y-6">
+                  <div><label className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 block">Nama Guru</label><select value={selectedTeacher} onChange={e => setSelectedTeacher(e.target.value)} className="w-full bg-stone-50 border border-stone-200 p-4 rounded-xl garamond text-xl outline-none focus:ring-2 focus:ring-[#c5a059]">{teachers.map(t => <option key={t}>{t}</option>)}</select></div>
+                  <button type="submit" className="w-full gold-gradient text-white font-bold py-5 rounded-xl uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all text-sm flex items-center justify-center gap-3"><Icon name="check-circle-2" /> Sahkan Tempahan</button>
+                </div>
+              </form>
+              <AnimatePresence>{message && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`mt-6 p-5 rounded-xl border font-bold flex items-center gap-3 ${message.type === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-800 border-rose-200'}`}><Icon name={message.type === 'success' ? 'check' : 'alert-circle'} /> {message.text}</motion.div>}</AnimatePresence>
+            </motion.section>
+
+            {/* 2. GRID */}
+            <AvailabilityGrid bookings={bookings} />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+              {/* 3. DELETE */}
+              <section className="bg-white p-8 rounded-2xl luxury-shadow gold-border space-y-6">
+                <div className="flex items-center gap-3 border-b pb-4"><Icon name="trash-2" className="text-rose-500" /><h2 className="text-2xl font-semibold">3. Padam Tempahan</h2></div>
+                <div className="space-y-4">
+                  <label className="text-xs font-bold text-stone-400 uppercase block">Pilih Tarikh Padam</label>
+                  <div className="flex gap-2"><input type="date" value={dateToClear} onChange={e => setDateToClear(e.target.value)} className="flex-1 bg-stone-50 border p-4 rounded-xl outline-none focus:ring-2 focus:ring-rose-200" /><button onClick={handleClearByDate} className="bg-rose-500 text-white px-6 py-4 rounded-xl font-bold uppercase text-xs tracking-widest shadow-md">Padam</button></div>
+                  <button onClick={() => { if (confirm('Padam SEMUA?')) setBookings([]); }} className="w-full py-4 border-2 border-dashed border-rose-100 text-rose-400 rounded-xl hover:bg-rose-50 font-bold italic text-sm transition-all flex items-center justify-center gap-2"><Icon name="refresh-cw" size={14} /> Reset Semua Data</button>
+                </div>
+              </section>
+
+              {/* 4. TEACHERS */}
+              <TeacherManager teachers={teachers} onAdd={name => setTeachers([...teachers, name])} onDelete={name => setTeachers(teachers.filter(t => t !== name))} />
+            </div>
+
+            <footer className="mt-20 text-center py-12">
+              <div className="luxury-font text-[#c5a059] font-bold text-3xl mb-4 tracking-[0.4em] uppercase opacity-80">SEMELANG CEMERLANG CUTE</div>
+              <p className="text-stone-400 text-sm garamond italic tracking-widest uppercase">Hak Cipta Terpelihara SMK Landas &copy; 2025</p>
+            </footer>
+          </main>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
 </body>
 </html>
